@@ -6,7 +6,11 @@ const accountSchema = new mongoose.Schema({
         ref: "User",
         unique: true
     },
-    balance: Number,
+    balance: {
+        type: Number,
+        required: true,
+        default: 0,
+    }
 });
 
 export const AccountModel = mongoose.model("Account", accountSchema);
