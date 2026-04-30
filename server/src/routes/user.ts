@@ -81,9 +81,9 @@ router.post("/signin", async (req, res) => {
     const isValid = comparePassword(data.password, user?.password)
 
     if (!isValid) {
-      return res.status(401).json{
+      return res.status(401).json({
         message: "Invalid credentials"
-      }
+      });
     }
 
     const token = signJwt({ userId: user._id.toString() });
