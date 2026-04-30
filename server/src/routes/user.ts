@@ -4,6 +4,7 @@ import { signinSchema, signupSchema, updateUserSchema } from "../types";
 import { signJwt } from "../config/jwt";
 import { authMiddleware } from "../middleware";
 import { AccountModel } from "../models/account";
+import { comparePassword, hashPassword } from "../config/password";
 
 const router = Router();
 
@@ -28,12 +29,13 @@ router.post("/signup", async (req, res) => {
     }
 
     //TODO: hash password
+    const hashedPassword = await hashPassword(data.password)
 
     const userDb = await UserModel.create({
       username: data.username,
       firstName: data.firstName,
       lastName: data.lastName,
-      password: data.password,
+      password: hashedPassword,
     });
 
     await AccountModel.create({
@@ -70,10 +72,18 @@ router.post("/signin", async (req, res) => {
       username: data.username,
     });
 
-    if (!user || user.password !== data.password) {
+    if (!user) {
       return res.status(401).json({
         message: "Invalid credentials",
       });
+    }
+
+    const isValid = comparePassword(data.password, user?.password)
+
+    if (!isValid) {
+      return res.status(401).json{
+        message: "Invalid credentials"
+      }
     }
 
     const token = signJwt({ userId: user._id.toString() });
